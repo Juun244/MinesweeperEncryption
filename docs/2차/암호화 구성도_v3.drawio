@@ -1,0 +1,112 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="암호화 구성도 (v3)" id="5779234683">
+    <mxGraphModel grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="평문" vertex="1">
+          <mxGeometry x="0" y="0" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="패딩 (PKCS#7)" vertex="1">
+          <mxGeometry x="0" y="100" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="16바이트 블록 분할" vertex="1">
+          <mxGeometry x="0" y="200" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="p4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="CBC 연결&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(이전 암호문 블록 ⊕,&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;첫 블록은 IV)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="0" y="300" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="8×16 지뢰판으로 변환&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(128비트 = 128칸)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="0" y="405" width="160" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="k1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="비밀키" vertex="1">
+          <mxGeometry x="360" y="0" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="k2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="SHA-256 해시&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(앞 128비트 사용)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="360" y="100" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="k3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" value="초기 지뢰판 B(0) 생성&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(8×16 크기, K0 = B(0))&lt;/font&gt;" vertex="1">
+          <mxGeometry x="360" y="175" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="k4" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="지뢰판 진화 (r = 1 … 16)&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;B(r) = Evolve(Evolve(B(r-1))) ⊕ RC(r)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;Evolve = MineSub ×2 → MinePerm&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;K(r) = B(r)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="360" y="250" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="k5" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="라운드 키 생성&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(K0 … K16, 17개 × 128비트)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="360" y="355" width="230" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="r1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" value="라운드 1&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(⊕ K0 → MineSub ×2 → MinePerm)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="165" y="510" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="r2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" value="라운드 2&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(⊕ K1 → MineSub ×2 → MinePerm)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="165" y="620" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="dots" parent="1" style="text;html=1;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;fontSize=13;" value="⋮" vertex="1">
+          <mxGeometry x="165" y="685" width="220" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="r16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=13;" value="라운드 16&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(⊕ K15 → MineSub ×2 → MinePerm)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="165" y="730" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fk" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=13;" value="최종 키 혼합&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(⊕ K16)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="165" y="830" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ct" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" value="암호문 블록&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;(다음 블록의 CBC 입력)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="165" y="930" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="n1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;align=left;spacingLeft=10;fontSize=13;" value="&lt;b&gt;한 라운드&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;키 혼합 → MineSub ×2 (치환)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;→ MinePerm (전치)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px&quot;&gt;※ 라운드 함수 구성도 참고&lt;/font&gt;" vertex="1">
+          <mxGeometry x="410" y="610" width="210" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="p1" target="p2" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="p2" target="p3" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="p3" target="p4" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="p4" target="p5" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="k1" target="k2" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="k2" target="k3" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="k3" target="k4" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="k4" target="k5" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="p5" target="r1" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="275" y="432.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="k5" target="r1" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="475" y="480" />
+              <mxPoint x="275" y="480" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="r1" target="r2" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="r16" target="fk" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="fk" target="ct" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="n1" target="r2" style="html=1;rounded=0;endArrow=none;dashed=1;strokeColor=#666666;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

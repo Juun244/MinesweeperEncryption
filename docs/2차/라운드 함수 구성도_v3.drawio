@@ -1,0 +1,93 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="라운드 함수 구성도 (v3)" id="6448909641">
+    <mxGraphModel grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="gS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#fffbea;strokeColor=#d6b656;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontStyle=1;fontSize=13;" value="MineSub ×2 (치환)" vertex="1">
+          <mxGeometry x="210" y="125" width="340" height="370" as="geometry" />
+        </mxCell>
+        <mxCell id="gP" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f7f0fa;strokeColor=#9673a6;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;fontStyle=1;fontSize=13;" value="MinePerm (전치)" vertex="1">
+          <mxGeometry x="210" y="525" width="340" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="S" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=15;" value="상태 S&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(8×16 지뢰판, 128비트)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="20" y="40" width="200" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="K" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=15;" value="라운드 키 K(r)&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(128비트)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="560" y="40" width="200" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="x" parent="1" style="ellipse;whiteSpace=wrap;html=1;fontSize=15;" value="XOR 연산&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;S ⊕ K(r)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="300" y="42.5" width="160" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="m0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;" value="① 색 0 칸 갱신&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(짝수 행 · 짝수 열)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="240" y="160" width="280" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="m1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;" value="② 색 1 칸 갱신&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(짝수 행 · 홀수 열)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="240" y="245" width="280" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="m2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;" value="③ 색 2 칸 갱신&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(홀수 행 · 짝수 열)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="240" y="330" width="280" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="m3" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=15;" value="④ 색 3 칸 갱신&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(홀수 행 · 홀수 열)&lt;/font&gt;" vertex="1">
+          <mxGeometry x="240" y="415" width="280" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=15;" value="① 행 회전&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;행 i를 오른쪽으로 (3i + 1)칸&lt;/font&gt;" vertex="1">
+          <mxGeometry x="240" y="560" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=15;" value="② 열 회전&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;열 j를 아래로 j칸&lt;/font&gt;" vertex="1">
+          <mxGeometry x="240" y="645" width="280" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="o" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=15;" value="다음 라운드 상태 S&amp;#x27;" vertex="1">
+          <mxGeometry x="270" y="770" width="220" height="55" as="geometry" />
+        </mxCell>
+        <mxCell id="nS" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;align=left;spacingLeft=10;fontSize=15;" value="&lt;b&gt;갱신 규칙&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;해당 색의 칸마다 이웃 8칸의&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;지뢰(1) 수 c를 세어&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;c ∈ {0, 3, 4, 8}이면 반전&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;(지뢰 ↔ 빈칸)&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;판의 위·아래, 좌·우는 이어짐&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;①~④를 마치면 한 번 더 반복&lt;/font&gt;" vertex="1">
+          <mxGeometry x="580" y="220" width="230" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="nP" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;align=left;spacingLeft=10;fontSize=15;" value="&lt;b&gt;전치 성질&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;128칸이 1:1로 대응하는 고정 전치&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:12px&quot;&gt;이웃했던 비트를 판 전체로 흩뜨림&lt;/font&gt;" vertex="1">
+          <mxGeometry x="580" y="580" width="230" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="e0" edge="1" parent="1" source="S" target="x" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="K" target="x" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="x" target="m0" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="m0" target="m1" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="m1" target="m2" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="m2" target="m3" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="m3" target="p1" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="p1" target="p2" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="p2" target="o" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#000000;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="m3" target="m0" style="html=1;rounded=0;endArrow=classic;endSize=6;strokeColor=#b08a1e;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="536" y="442.5" />
+              <mxPoint x="536" y="187.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="nS" target="gS" style="html=1;rounded=0;endArrow=none;dashed=1;strokeColor=#666666;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.4865;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="nP" target="gP" style="html=1;rounded=0;endArrow=none;dashed=1;strokeColor=#666666;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" value="">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
