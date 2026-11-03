@@ -166,21 +166,30 @@ def _set_rows(rows) -> int:
     return x
 
 
+def mine_perm_rows(x: int) -> int:
+    """MinePerm ①: 행 i를 오른쪽으로 (3i + 1)칸 회전 → 새 열 j' = (j + 3i + 1) mod 16"""
+    rows = []
+    for i in range(ROWS):
+        r, s = _row(x, i), ROW_SHIFTS[i]
+        rows.append(((r >> s) | (r << (COLS - s))) & 0xFFFF)
+    return _set_rows(rows)
+
+
+def mine_perm_cols(x: int) -> int:
+    """MinePerm ②: 열 j를 아래로 j칸(= j mod 8) 회전 → 새 행 i' = (i + j) mod 8"""
+    out = 0
+    for s in range(ROWS):
+        out |= _rotr(x & _COL_GROUP[s], COLS * s)
+    return out
+
+
 def mine_perm(x: int) -> int:
     """
     MinePerm:
       ① 행 i를 오른쪽으로 (3i + 1)칸 회전   → 새 열 j' = (j + 3i + 1) mod 16
       ② 열 j'을 아래로 j'칸 회전              → 새 행 i' = (i + j') mod 8
     """
-    rows = []
-    for i in range(ROWS):
-        r, s = _row(x, i), ROW_SHIFTS[i]
-        rows.append(((r >> s) | (r << (COLS - s))) & 0xFFFF)
-    x = _set_rows(rows)
-    out = 0
-    for s in range(ROWS):
-        out |= _rotr(x & _COL_GROUP[s], COLS * s)
-    return out
+    return mine_perm_cols(mine_perm_rows(x))
 
 
 def mine_perm_inv(x: int) -> int:

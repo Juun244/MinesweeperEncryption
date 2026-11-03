@@ -136,19 +136,36 @@ const LEG_MINE = [["C9D3FF", "지뢰 (1)"], ["FFFFFF", "빈칸 (0)"]];
 const LEG_CHANGED = [["C9D3FF", "지뢰 (1)"], ["F4A26B", "바뀌어서 지뢰가 된 칸"], ["FBD9C2", "바뀌어서 빈칸이 된 칸"]];
 function neighborhood(ex) {
   const W3 = 700;
+  const marked = new Set((ex.marks || []).map(([a, b]) => `${a},${b}`));
   const rows = ex.nb.map((r, a) => new TableRow({ children: r.map((v, b) => (a === 1 && b === 1)
     ? cell("■", W3, { fill: "1F2A5A", color: "FFFFFF", align: AlignmentType.CENTER, bold: true })
-    : cell(String(v), W3, { fill: v ? "C9D3FF" : "FFFFFF", align: AlignmentType.CENTER, mono: true, bold: !!v })) }));
+    : cell(String(v), W3, { fill: marked.has(`${a},${b}`) ? (v ? "F4A26B" : "FBD9C2") : (v ? "C9D3FF" : "FFFFFF"), align: AlignmentType.CENTER, mono: true, bold: !!v })) }));
   return new Table({ width: { size: W3 * 3, type: WidthType.DXA }, columnWidths: [W3, W3, W3], rows });
 }
 function exampleCells(examples) {
   const W2 = 4819;
   const mk = (ex) => [new Paragraph({ spacing: { after: 80 }, children: runs(`**(행${ex.cell[0]}, 열${HEXCOL[ex.cell[1]]})** — 현재 값 ${ex.value}`) }), neighborhood(ex),
     new Paragraph({ spacing: { before: 80, after: 0 }, children: runs(`c = ${ex.c} → ${ex.flip ? `{0,3,4,8}에 포함 → **반전** (${ex.value} → ${1 - ex.value})` : `포함 안 됨 → **유지** (${ex.value})`}`) })];
-  return [new Table({ width: { size: W2 * 2, type: WidthType.DXA }, columnWidths: [W2, W2], rows: [new TableRow({ cantSplit: true, children: examples.map(mk).map((ch) => new TableCell({
-    width: { size: W2, type: WidthType.DXA }, children: ch, margins: { top: 100, bottom: 100, left: 120, right: 120 },
-    borders: { top: NOB, bottom: NOB, left: NOB, right: NOB },
-  })) })] }), new Paragraph({ spacing: { after: 120 }, children: [] })];
+  const rows = [];
+  for (let k = 0; k < examples.length; k += 2) {
+    const pair = examples.slice(k, k + 2).map(mk);
+    while (pair.length < 2) pair.push([new Paragraph({ children: [] })]);
+    rows.push(new TableRow({ cantSplit: true, children: pair.map((ch) => new TableCell({
+      width: { size: W2, type: WidthType.DXA }, children: ch, margins: { top: 100, bottom: 100, left: 120, right: 120 },
+      borders: { top: NOB, bottom: NOB, left: NOB, right: NOB },
+    })) }));
+  }
+  return [new Table({ width: { size: W2 * 2, type: WidthType.DXA }, columnWidths: [W2, W2], rows }), new Paragraph({ spacing: { after: 120 }, children: [] })];
+}
+// 한 행(16칸) 또는 한 열(8칸)의 비트를 칸 모양으로 보여 주는 작은 표
+function bitStrip(rowsSpec, cellW) {
+  // rowsSpec: [[라벨, [비트...], 강조할 칸 인덱스 Set], ...]
+  const LW = 2200;
+  const n = rowsSpec[0][1].length;
+  const widths = [LW].concat(Array(n).fill(cellW));
+  const trs = rowsSpec.map(([label, bits, hi]) => new TableRow({ cantSplit: true, children: [cell(label, LW, { fill: "E9ECF5", size: 17, bold: true, pad: 30, keepNext: true })]
+    .concat(bits.map((v, k) => cell(String(v), cellW, { fill: hi && hi.has(k) ? (v ? "F4A26B" : "FBD9C2") : (v ? "C9D3FF" : "FFFFFF"), align: AlignmentType.CENTER, size: 17, bold: !!v, mono: true, pad: 30, padX: 0, keepNext: true }))) }));
+  return [new Table({ width: { size: LW + n * cellW, type: WidthType.DXA }, columnWidths: widths, rows: trs }), new Paragraph({ spacing: { after: 160 }, children: [] })];
 }
 const COLOR_NAMES = ["짝수 행·짝수 열", "짝수 행·홀수 열", "홀수 행·짝수 열", "홀수 행·홀수 열"];
 function colorTable(colorsList, titles) {
@@ -281,6 +298,12 @@ C.push(h2("4.2 키 섞기 (⊕ K)"));
 C.push(p("라운드 키도 같은 크기의 8×16 판입니다. 두 판을 겹쳐 XOR하면 **키 판에서 1인 칸만 지뢰↔빈칸이 뒤집힙니다**. 키를 모르는 사람은 이후의 판 상태를 알 수 없게 됩니다."));
 C.push(h2("4.3 MineSub — 지뢰찾기 규칙으로 칸 뒤집기 (치환)"));
 C.push(p("MineSub는 Mine(지뢰) + Substitution(치환)에서 따온 이름입니다. 판의 **값**을 바꾸는 단계입니다."));
+C.push(...callout("MineSub 한눈에 보기", [
+  "• **입력과 출력**: 8×16 지뢰판(128비트) → 8×16 지뢰판(128비트). 칸의 위치는 그대로이고 **값(지뢰/빈칸)만** 바뀝니다.",
+  "• **하는 일**: 칸마다 주변 지뢰 수를 세어, 그 수가 0·3·4·8이면 그 칸을 뒤집습니다.",
+  "• **핵심 두 가지**: ① 칸들을 4색으로 나눠 **색 순서대로** 처리하고, 앞 색에서 바뀐 값은 다음 색을 처리할 때 **바로 반영**됩니다. ② 이 순서 덕분에 **되돌릴 수 있습니다**.",
+  "• **어디에 쓰이나**: 암호화 라운드(라운드마다 2번)와 키 스케줄(진화 한 번에 2번). 5.1절 ③에서 실제 값으로 한 단계씩 보여 줍니다.",
+]));
 C.push(h3("규칙"));
 C.push(...steps([
   "판의 칸을 (행 번호의 홀짝, 열 번호의 홀짝)에 따라 **4가지 색**으로 나눕니다.",
@@ -330,6 +353,12 @@ C.push(image("라운드 함수 구성도_v3.png", 560, "v3 라운드 함수 구�
 C.push(caption("그림 2. v3 라운드 함수 구성도 (MineSub의 ①~④를 2번 반복)"));
 C.push(h2("4.4 MinePerm — 칸 위치 섞기 (전치)"));
 C.push(p("MinePerm은 Mine + Permutation(전치)에서 따온 이름입니다. 값은 그대로 두고 **위치만** 옮깁니다."));
+C.push(...callout("MinePerm 한눈에 보기", [
+  "• **입력과 출력**: 8×16 지뢰판 → 8×16 지뢰판. 지뢰 개수와 각 칸의 값은 그대로이고 **자리만** 바뀝니다.",
+  "• **하는 일**: ① 각 행을 옆으로 돌린 뒤 ② 각 열을 아래로 돌립니다. 돌리는 칸 수는 행·열 번호로 정해진 고정값이라 키와 무관합니다.",
+  "• **왜 필요한가**: MineSub는 바로 옆 칸끼리만 영향을 주므로, 칸을 멀리 흩어야 변화가 판 전체로 퍼집니다.",
+  "• **어디에 쓰이나**: 암호화 라운드와 키 스케줄의 진화마다 한 번. 5.1절 ③에서 실제 값으로 보여 줍니다.",
+]));
 C.push(...steps([
   "**행 회전**: i번째 행을 오른쪽으로 (3i + 1)칸 돌립니다.",
   "**열 회전**: 각 열을 (새) 열 번호만큼 아래로 돌립니다.",
@@ -371,7 +400,8 @@ C.push(caption("그림 4. v3 역라운드 함수 구성도"));
 // ---------- 5장: HELLO 예시 ----------
 const E = D.enc, KS = D.ks, DEC = D.dec;
 C.push(h1("5. 실제 예시: HELLO 암호화와 복호화"));
-C.push(p("평문 **HELLO**를 비밀키 **YSKL**로 암호화하고 다시 복호화하는 과정을, 그림 1과 그림 3의 상자 순서대로 따라가 봅니다. **라운드 1(복호화는 역라운드 16)은 자세히**, 나머지 라운드는 결과만 보여 줍니다."));
+C.push(p("평문 **HELLO**를 비밀키 **YSKL**로 암호화하고 다시 복호화하는 과정을, 그림 1과 그림 3의 상자 순서대로 따라가 봅니다."));
+C.push(p("MineSub와 MinePerm은 키 스케줄과 암호화 라운드에서 계속 반복해서 쓰입니다. 그래서 **처음 등장하는 5.1절 ③(K1 만들기)에서 두 함수가 실제 값으로 어떻게 동작하는지 한 단계씩 자세히** 보여 주고, 그 뒤로는 같은 동작이므로 **결과만** 보여 줍니다. 복호화에서는 처음 나오는 역연산인 역라운드 16을 자세히 보여 줍니다."));
 C.push(...table(["항목", "값"], [
   ["평문", "HELLO"],
   ["비밀키", "YSKL"],
@@ -391,19 +421,89 @@ C.push(pk("앞 16바이트를 8×16 지뢰판으로 펼친 것이 **첫 지뢰�
 C.push(...code([`B(0) = K0 = ${KS.B0.hex}`], true));
 C.push(...board(KS.B0.grid, { labels: rowLabels(KS.B0.hex) }));
 C.push(legend(LEG_MINE));
-C.push(h3("③ 지뢰판 진화 → K1 (자세히)"));
-C.push(p("B(0)에 Evolve(MineSub → MineSub → MinePerm)를 **2번** 적용한 뒤 RC(1)을 XOR하면 K1이 됩니다. 데이터 암호화의 라운드와 똑같은 연산이므로, 각 MineSub에서 몇 칸이 뒤집히는지 보면 다음과 같습니다."));
-C.push(h4("진화 1회차"));
-C.push(...colorTable([KS.step1.sub1.colors, KS.step1.sub2.colors], ["MineSub 1번째", "MineSub 2번째"]));
+C.push(h3("③ 지뢰판 진화 → K1 (MineSub·MinePerm 자세히)"));
+const DT = KS.detail;
+C.push(p("K1은 B(0)에 **Evolve(MineSub → MineSub → MinePerm)를 2번** 적용한 뒤 RC(1)을 XOR해서 만듭니다. 여기가 5장에서 MineSub와 MinePerm이 처음 쓰이는 곳이므로, **진화 1회차를 한 단계씩 자세히** 따라가 봅니다."));
 C.push(...code([
-  `MineSub 1번째 후 : ${KS.step1.sub1.after.hex}`,
-  `MineSub 2번째 후 : ${KS.step1.sub2.after.hex}`,
-  `MinePerm 후      : ${KS.step1.perm.hex}   = 진화 1회차 결과`,
+  "B(0) ─[MineSub 1번째]─[MineSub 2번째]─[MinePerm]─▶ 진화 1회차 결과   ← (가)~(다) 자세히",
+  "     ─[MineSub 1번째]─[MineSub 2번째]─[MinePerm]─▶ 진화 2회차 결과   ← (라) 결과만",
+  "     ─[⊕ RC(1)]─▶ K1                                                  ← (마)",
 ]));
-C.push(h4("진화 2회차"));
-C.push(pk("진화 1회차 결과에 같은 과정을 한 번 더 적용합니다."));
-C.push(...code([`진화 2회차 결과  : ${KS.step2_out}`]));
-C.push(h4("라운드 상수 XOR → K1"));
+
+// (가) MineSub 1번째
+C.push(h4("(가) MineSub 1번째 — 입력: B(0)"));
+C.push(p("MineSub는 판의 칸을 4가지 색으로 나눠 **색 0 → 1 → 2 → 3 순서로** 처리합니다. 각 단계에서는 그 색의 칸 32개만 검사하고, 다른 색 칸은 건드리지 않습니다. 각 칸에서 하는 일은 하나입니다."));
+C.push(...code(["주변 8칸의 지뢰 수 c를 센다 → c가 0, 3, 4, 8 중 하나면 그 칸을 뒤집는다(0↔1), 아니면 그대로 둔다"]));
+C.push(p("**[색 0 단계]** 짝수 행·짝수 열의 칸들입니다. 판의 위아래·좌우가 이어져 있으므로 (행0, 열0)의 위쪽 이웃은 행7, 왼쪽 이웃은 열F입니다. 두 칸을 예로 들면 다음과 같습니다(가운데 ■가 검사하는 칸)."));
+C.push(...exampleCells(DT.examples.slice(0, 2)));
+C.push(pk(`같은 방식으로 색 0의 32칸을 모두 검사하면 **${DT.sub1_steps[0].flips}칸**이 뒤집힙니다. 주황색이 이번에 뒤집힌 칸입니다.`));
+C.push(...board(DT.s0_after.grid, { mark: DT.sub1_steps[0].cells }));
+C.push(legend(LEG_CHANGED));
+{
+  const ex = DT.examples[2];
+  const markedNow = (ex.marks || []).map(([a, b]) => ex.nb[a][b]);
+  const cOld = ex.c - markedNow.reduce((s, v) => s + v, 0) + markedNow.reduce((s, v) => s + (1 - v), 0);
+  const oldFlip = [0, 3, 4, 8].includes(cOld);
+  C.push(p(`**[색 1 단계]** 짝수 행·홀수 열의 칸들입니다. 여기서 중요한 점은 **색 0 단계에서 바뀐 값을 그대로 반영해서 센다**는 것입니다. 아래 (행${ex.cell[0]}, 열${HEXCOL[ex.cell[1]]})의 주황색 이웃은 방금 색 0 단계에서 뒤집힌 칸입니다.`));
+  C.push(...exampleCells([ex]));
+  C.push(p(`바뀐 값으로 세면 c = ${ex.c}이므로 ${ex.flip ? "뒤집힙니다" : "그대로 둡니다"}. 만약 색 0 단계 **전** 값으로 셌다면 c = ${cOld}가 되어 ${oldFlip ? "뒤집혔을" : "그대로였을"} 것입니다. 이렇게 앞 색의 결과가 다음 색에 영향을 주기 때문에, 한 번의 MineSub 안에서도 변화가 퍼져 나갑니다.`));
+}
+C.push(pk(`색 1에서는 **${DT.sub1_steps[1].flips}칸**이 뒤집힙니다.`));
+C.push(...board(DT.sub1_steps[1].board.grid, { mark: DT.sub1_steps[1].cells }));
+C.push(legend(LEG_CHANGED));
+C.push(p(`**[색 2, 색 3 단계]** 같은 방식으로 홀수 행·짝수 열(색 2), 홀수 행·홀수 열(색 3)을 차례로 처리하면 각각 ${DT.sub1_steps[2].flips}칸, ${DT.sub1_steps[3].flips}칸이 뒤집힙니다.`));
+C.push(...colorTable([DT.sub1_steps], ["반전된 칸 수"]));
+C.push(pk("MineSub 1번째의 최종 결과입니다. 주황색은 B(0)과 비교해 바뀐 칸 전체입니다."));
+C.push(...code([`= ${DT.sub1_out.hex}`], true));
+C.push(...board(DT.sub1_out.grid, { mark: DT.sub1_changed }));
+C.push(legend(LEG_CHANGED));
+C.push(...callout("되돌릴 수 있는 이유 (복호화 미리 보기)", [
+  "색 3 단계에서 뒤집힌 칸들의 주변 8칸은 모두 색 0·1·2이고, 색 3 단계 동안에는 바뀌지 않았습니다. 그래서 색 3 단계가 끝난 판에서 같은 칸들의 주변 지뢰 수를 다시 세면 **똑같은 c**가 나오고, 같은 칸들을 한 번 더 뒤집으면 색 3 단계 전으로 돌아갑니다. 이것을 색 3 → 2 → 1 → 0 순서로 하면 MineSub 전체가 되돌려집니다.",
+]));
+
+// (나) MineSub 2번째
+C.push(h4("(나) MineSub 2번째 — 입력: MineSub 1번째 결과"));
+C.push(pk("규칙과 순서는 1번째와 **똑같습니다**. 다만 1번째에서 칸들이 바뀌어 주변 지뢰 수가 달라졌으므로, 이번에는 다른 칸들이 뒤집힙니다."));
+C.push(...colorTable([DT.sub2.colors], ["반전된 칸 수"]));
+C.push(...code([`= ${DT.sub2.after.hex}`], true));
+C.push(...board(DT.sub2.after.grid, { mark: DT.sub2.changed }));
+C.push(legend(LEG_CHANGED));
+
+// (다) MinePerm
+{
+  const re = DT.row_example, ce = DT.col_example;
+  C.push(h4("(다) MinePerm — 입력: MineSub 2번째 결과"));
+  C.push(p("MinePerm은 값은 그대로 두고 **자리만** 옮깁니다. 두 단계로 이루어집니다."));
+  C.push(p(`**[① 행 회전]** i번째 행을 오른쪽으로 (3i + 1)칸 돌립니다. 행 0은 1칸, 행 1은 4칸, 행 2는 7칸 … 행 7은 22 mod 16 = 6칸입니다. 오른쪽 끝을 넘어간 칸은 왼쪽 끝으로 돌아옵니다. 예를 들어 행 ${re.row}을 오른쪽으로 ${re.shift}칸 돌리면, 맨 오른쪽 ${re.shift}칸(주황색)이 맨 앞으로 옵니다.`));
+  const n = re.before.length;
+  C.push(...bitStrip([
+    [`행 ${re.row} (돌리기 전)`, re.before, new Set(Array.from({ length: re.shift }, (_, k) => n - re.shift + k))],
+    [`행 ${re.row} (오른쪽 ${re.shift}칸)`, re.after, new Set(Array.from({ length: re.shift }, (_, k) => k))],
+  ], 460));
+  C.push(pk("8개 행을 모두 돌린 결과입니다."));
+  C.push(...board(DT.rows.grid));
+  C.push(legend(LEG_MINE));
+  C.push(p(`**[② 열 회전]** 각 열을 열 번호만큼 아래로 돌립니다(행이 8개이므로 열 j는 j mod 8칸). 열 0은 그대로, 열 1은 1칸 … 열 8은 다시 0칸입니다. 아래쪽 끝을 넘어간 칸은 위로 돌아옵니다. 예를 들어 열 ${ce.col}을 아래로 ${ce.shift}칸 돌리면 다음과 같습니다(가로로 눕혀서 표시, 왼쪽이 행 0).`));
+  C.push(...bitStrip([
+    [`열 ${ce.col} (돌리기 전)`, ce.before, new Set([4, 5, 6, 7])],
+    [`열 ${ce.col} (아래로 ${ce.shift}칸)`, ce.after, new Set([0, 1, 2, 3])],
+  ], 700));
+  C.push(pk("16개 열을 모두 돌린 결과가 **진화 1회차 결과**입니다."));
+  C.push(...code([`= ${DT.cols.hex}`], true));
+  C.push(...board(DT.cols.grid));
+  C.push(legend(LEG_MINE));
+  C.push(pk("두 단계를 합치면 각 칸이 어디로 가는지 공식으로 쓸 수 있습니다. 실제 값으로 확인해 보면 다음과 같습니다."));
+  C.push(...table(["원래 위치", "① 행 회전 후", "② 열 회전 후", "그 칸의 값"], DT.map_examples.map(([a, b, v]) => {
+    const j2 = (a[1] + 3 * a[0] + 1) % 16;
+    return [`(행${a[0]}, 열${HEXCOL[a[1]]})`, `(행${a[0]}, 열${HEXCOL[j2]})`, `(행${b[0]}, 열${HEXCOL[b[1]]})`, String(v)];
+  }), [2400, 2400, 2400, 2438]));
+}
+
+// (라) 진화 2회차
+C.push(h4("(라) 진화 2회차"));
+C.push(pk("진화 1회차 결과에 (가)~(다)를 **똑같이 한 번 더** 적용합니다. 동작은 같으므로 결과만 적습니다."));
+C.push(...code([`진화 2회차 결과 : ${KS.step2_out}`]));
+C.push(h4("(마) 라운드 상수 XOR → K1"));
 C.push(...code([`  ${KS.step2_out}   (진화 2회차 결과)`, `⊕ ${KS.RC1}   (RC1)`, `= ${KS.K1.hex}   = K1`], true));
 C.push(...board(KS.K1.grid));
 C.push(legend(LEG_MINE));
@@ -427,29 +527,24 @@ C.push(h3("④ 8×16 지뢰판으로 변환"));
 C.push(pk("한 행에 2바이트씩 넣습니다. 파란 칸이 지뢰(1)입니다."));
 C.push(...board(E.p_xor_iv.grid, { labels: rowLabels(E.p_xor_iv.hex) }));
 C.push(legend(LEG_MINE));
-C.push(h3("⑤ 라운드 1 (자세히)"));
-C.push(h4("[1] 키 섞기: ⊕ K0"));
+C.push(h3("⑤ 라운드 1"));
+C.push(p("라운드 1은 **AddRoundKey(⊕ K0) → MineSub → MineSub → MinePerm**입니다. MineSub와 MinePerm의 동작은 5.1절 ③ (가)~(다)에서 본 것과 **완전히 같고**, 입력이 키 판 대신 데이터 판이라는 점만 다릅니다. 그래서 여기서는 각 단계의 결과만 보여 줍니다."));
+C.push(h4("[1] AddRoundKey: ⊕ K0"));
+C.push(pk("이 단계에서 처음으로 비밀키(에서 나온 K0)가 데이터에 섞입니다."));
 C.push(...code([`  ${E.p_xor_iv.hex}`, `⊕ ${KS.K[0]}   (K0)`, `= ${E.r1_xor.hex}`], true));
 C.push(...board(E.r1_xor.grid));
 C.push(legend(LEG_MINE));
-C.push(h4("[2] MineSub 1번째"));
-C.push(p("색 0의 칸 중 두 개를 예로 들어 봅니다. 판의 위아래·좌우가 이어져 있으므로, 예를 들어 (행0, 열0)의 위쪽 이웃은 행7, 왼쪽 이웃은 열F입니다."));
-C.push(...exampleCells(E.r1_sub1.examples));
-C.push(pk("같은 방식으로 색 0 → 1 → 2 → 3을 차례로 처리합니다. 주황색 칸이 이번 단계에서 바뀐 칸입니다."));
-C.push(...colorTable([E.r1_sub1.colors], ["반전된 칸 수"]));
-C.push(...code([`= ${E.r1_sub1.after.hex}`], true));
-C.push(...board(E.r1_sub1.after.grid, { mark: E.r1_sub1.changed }));
-C.push(legend(LEG_CHANGED));
-C.push(h4("[3] MineSub 2번째"));
-C.push(pk("1번째 결과에 **같은 규칙을 한 번 더** 적용합니다. 1번째에서 뒤집힌 칸들 때문에 주변 지뢰 수가 달라졌으므로, 이번에는 다른 칸들이 뒤집힙니다."));
-C.push(...colorTable([E.r1_sub2.colors], ["반전된 칸 수"]));
-C.push(...code([`= ${E.r1_sub2.after.hex}`], true));
-C.push(...board(E.r1_sub2.after.grid, { mark: E.r1_sub2.changed }));
-C.push(legend(LEG_CHANGED));
-C.push(h4("[4] MinePerm"));
-C.push(pk("각 비트를 4.4절의 규칙대로 옮깁니다. 예를 들면 다음과 같습니다."));
-C.push(...table(["원래 위치", "그 칸의 값", "이동 후 위치"], E.perm_examples.map(([a, b, v]) => [`(행${a[0]}, 열${HEXCOL[a[1]]})`, String(v), `(행${b[0]}, 열${HEXCOL[b[1]]})`]), [3200, 3200, 3238]));
-C.push(pk("128칸을 모두 옮긴 결과가 **라운드 1의 출력**입니다."));
+C.push(h4("[2] MineSub × 2"));
+C.push(...colorTable([E.r1_sub1.colors, E.r1_sub2.colors], ["MineSub 1번째", "MineSub 2번째"]));
+{
+  const g0 = E.r1_xor.grid, g2 = E.r1_sub2.after.grid;
+  const changed = [];
+  g0.forEach((row, i) => row.forEach((v, j) => { if (v !== g2[i][j]) changed.push([i, j]); }));
+  C.push(...code([`MineSub 1번째 후 : ${E.r1_sub1.after.hex}`, `MineSub 2번째 후 : ${E.r1_sub2.after.hex}`], true));
+  C.push(...board(g2, { mark: changed }));
+  C.push(legend(LEG_CHANGED.slice(0, 1).concat([["F4A26B", "[1]과 비교해 바뀐 칸 (지뢰)"], ["FBD9C2", "[1]과 비교해 바뀐 칸 (빈칸)"]])));
+}
+C.push(h4("[3] MinePerm → 라운드 1 출력"));
 C.push(...code([`= ${E.r1_perm.hex}`], true));
 C.push(...board(E.r1_perm.grid));
 C.push(legend(LEG_MINE));
